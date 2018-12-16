@@ -68,9 +68,9 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
     private static final String FILE_EXTENSION_3GPP = ".3gpp";
 
-    public static final int BITRATE_AMR = 2 * 1024 * 8; // bits/sec
+    public static final int BITRATE_AMR = 2 * 1024 * 8;
 
-    public static final int BITRATE_3GPP = 20 * 1024 * 8; // bits/sec
+    public static final int BITRATE_3GPP = 20 * 1024 * 8;
 
     private static final int SEEK_BAR_MAX = 10000;
 
@@ -86,22 +86,13 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
     private boolean mShowFinishButton = false;
 
-    private String mErrorUiMessage = null; // Some error messages are displayed
-    // in the UI, not a dialog. This
-    // happens when a recording
-    // is interrupted for some reason.
+    private String mErrorUiMessage = null;
 
-    private long mMaxFileSize = -1; // can be specified in the intent
+    private long mMaxFileSize = -1;
 
     private RemainingTimeCalculator mRemainingTimeCalculator;
 
     private String mTimerFormat;
-
-//    private SoundPool mSoundPool;
-
-//    private int mPlaySound;
-
-//    private int mPauseSound;
 
     private HashSet<String> mSavedRecord;
 
@@ -136,19 +127,19 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             }
         }
     };
-    @BindView(R.id.newButton)
+    @BindView(R.id.ib_new)
     ImageButton mNewButton;
-    @BindView(R.id.finishButton)
+    @BindView(R.id.ib_finish)
     ImageButton mFinishButton;
-    @BindView(R.id.recordButton)
+    @BindView(R.id.ib_record)
     ImageButton mRecordButton;
-    @BindView(R.id.stopButton)
+    @BindView(R.id.ib_stop)
     ImageButton mStopButton;
-    @BindView(R.id.playButton)
+    @BindView(R.id.ib_play)
     ImageButton mPlayButton;
-    @BindView(R.id.pauseButton)
+    @BindView(R.id.ib_pause)
     ImageButton mPauseButton;
-    @BindView(R.id.deleteButton)
+    @BindView(R.id.ib_delete)
     ImageButton mDeleteButton;
 
     @BindView(R.id.file_name)
@@ -199,7 +190,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         if (mShowFinishButton) {
-            // reset state if it is a recording request
             mRecorder.reset();
             resetFileNameEditText();
         }
@@ -207,15 +197,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     }
 
     private void initResourceRefs() {
-
-//        mNewButton.setOnClickListener(this);
-//        mFinishButton.setOnClickListener(this);
-//        mRecordButton.setOnClickListener(this);
-//        mStopButton.setOnClickListener(this);
-//        mPlayButton.setOnClickListener(this);
-//        mPauseButton.setOnClickListener(this);
-//        mDeleteButton.setOnClickListener(this);
-
 
         resetFileNameEditText();
         mFileNameEditText.setNameChangeListener(new RecordNameEditText.OnNameChangeListener() {
@@ -227,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             }
         });
 
-
         mPlaySeekBar.setMax(SEEK_BAR_MAX);
         mPlaySeekBar.setOnSeekBarChangeListener(mSeekBarChangeListener);
 
@@ -236,13 +216,8 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         if (mShowFinishButton) {
             mNewButton.setVisibility(View.GONE);
             mFinishButton.setVisibility(View.VISIBLE);
-            mNewButton = mFinishButton; // use mNewButon variable for left
-            // button in the control panel
+            mNewButton = mFinishButton;
         }
-
-//        mSoundPool = new SoundPool(5, AudioManager.STREAM_SYSTEM, 5);
-//        mPlaySound = mSoundPool.load("/system/media/audio/ui/SoundRecorderPlay.ogg", 1);
-//        mPauseSound = mSoundPool.load("/system/media/audio/ui/SoundRecorderPause.ogg", 1);
 
         mLastClickTime = 0;
         mLastButtonId = 0;
@@ -256,32 +231,25 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             extension = FILE_EXTENSION_3GPP;
         }
 
-        // for audio which is used for mms, we can only use english file name
-        // mShowFinishButon indicates whether this is an audio for mms
         mFileNameEditText.initFileName(mRecorder.getRecordDir(), extension, mShowFinishButton);
     }
 
-    @OnClick({R.id.newButton, R.id.recordButton, R.id.stopButton,
-            R.id.playButton, R.id.pauseButton, R.id.finishButton,
-            R.id.deleteButton})
+    @OnClick({R.id.ib_new, R.id.ib_record, R.id.ib_stop,
+            R.id.ib_play, R.id.ib_pause, R.id.ib_finish,
+            R.id.ib_delete})
     public void onClick(View v) {
         if (System.currentTimeMillis() - mLastClickTime < 300) {
-            // in order to avoid user click bottom too quickly
             return;
         }
 
         if (!v.isEnabled())
             return;
 
-        if (v.getId() == mLastButtonId && v.getId() != R.id.newButton) {
-            // as the recorder state is async with the UI
-            // we need to avoid launching the duplicated action
+        if (v.getId() == mLastButtonId && v.getId() != R.id.ib_new) {
             return;
         }
 
-        if (v.getId() == R.id.stopButton && System.currentTimeMillis() - mLastClickTime < 1500) {
-            // it seems that the media recorder is not robust enough
-            // sometime it crashes when stop recording right after starting
+        if (v.getId() == R.id.ib_stop && System.currentTimeMillis() - mLastClickTime < 1500) {
             return;
         }
 
@@ -289,30 +257,30 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         mLastButtonId = v.getId();
 
         switch (v.getId()) {
-            case R.id.newButton:
+            case R.id.ib_new:
                 mFileNameEditText.clearFocus();
                 saveSample();
                 mRecorder.reset();
                 resetFileNameEditText();
                 break;
-            case R.id.recordButton:
+            case R.id.ib_record:
                 showOverwriteConfirmDialogIfConflicts();
                 break;
-            case R.id.stopButton:
+            case R.id.ib_stop:
                 mRecorder.stop();
                 break;
-            case R.id.playButton:
+            case R.id.ib_play:
                 mRecorder.startPlayback(mRecorder.playProgress());
                 break;
-            case R.id.pauseButton:
+            case R.id.ib_pause:
                 mRecorder.pausePlayback();
                 break;
-            case R.id.finishButton:
+            case R.id.ib_finish:
                 mRecorder.stop();
                 saveSample();
                 finish();
                 break;
-            case R.id.deleteButton:
+            case R.id.ib_delete:
                 showDeleteConfirmDialog();
                 break;
         }
@@ -324,11 +292,8 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     }
 
     private void stopAudioPlayback() {
-        // Shamelessly copied from MediaPlaybackService.java, which
-        // should be public, but isn't.
         Intent i = new Intent("com.android.music.musicservicecommand");
         i.putExtra("command", "pause");
-
         sendBroadcast(i);
     }
 
@@ -339,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             mErrorUiMessage = null;
         }
 
-        updateUi(false);
+        updateUi();
     }
 
     @Override
@@ -352,9 +317,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 message = res.getString(R.string.error_sdcard_access);
                 break;
             case Recorder.IN_CALL_RECORD_ERROR:
-                // TODO: update error message to reflect that the recording
-                // could not be
-                // performed during a call.
             case Recorder.INTERNAL_ERROR:
                 message = res.getString(R.string.error_app_internal);
                 break;
@@ -370,24 +332,22 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             mSampleInterrupted = true;
             mErrorUiMessage = getResources().getString(R.string.insert_sd_card);
-            updateUi(false);
+            updateUi();
         } else if (!mRemainingTimeCalculator.diskSpaceAvailable()) {
             mSampleInterrupted = true;
             mErrorUiMessage = getResources().getString(R.string.storage_is_full);
-            updateUi(false);
+            updateUi();
         } else {
             stopAudioPlayback();
 
             boolean isHighQuality = SoundRecorderPreferenceActivity.isHighQuality(this);
             if (AUDIO_AMR.equals(mRequestedType)) {
                 mRemainingTimeCalculator.setBitRate(BITRATE_AMR);
-                int outputfileformat = isHighQuality ? MediaRecorder.OutputFormat.AMR_WB
+                int outputFileFormat = isHighQuality ? MediaRecorder.OutputFormat.AMR_WB
                         : MediaRecorder.OutputFormat.AMR_NB;
-                mRecorder.startRecording(outputfileformat, mFileNameEditText.getText().toString(),
+                mRecorder.startRecording(outputFileFormat, mFileNameEditText.getText().toString(),
                         FILE_EXTENSION_AMR, isHighQuality, mMaxFileSize);
             } else if (AUDIO_3GPP.equals(mRequestedType)) {
-                // HACKME: for HD2, there is an issue with high quality 3gpp
-                // use low quality instead
                 if (Build.MODEL.equals("HTC HD2")) {
                     isHighQuality = false;
                 }
@@ -454,11 +414,9 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             String preExtension = AUDIO_AMR.equals(mRequestedType) ? FILE_EXTENSION_AMR
                     : FILE_EXTENSION_3GPP;
             if (!mRecorder.sampleFile().getName().endsWith(preExtension)) {
-                // the extension is changed need to stop current recording
                 mRecorder.reset();
                 resetFileNameEditText();
             } else {
-                // restore state
                 if (!mShowFinishButton) {
                     String fileName = mRecorder.sampleFile().getName().replace(preExtension, "");
                     mFileNameEditText.setText(fileName);
@@ -483,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         registerReceiver(mReceiver, filter);
 
         mStopUiUpdate = false;
-        updateUi(true);
+        updateUi();
 
         if (RecorderService.isRecording()) {
             Intent intent = new Intent(this, RecorderService.class);
@@ -510,7 +468,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
         mCanRequestChanged = true;
         mStopUiUpdate = true;
-//        stopAnimation();
 
         if (RecorderService.isRecording()) {
             Intent intent = new Intent(this, RecorderService.class);
@@ -530,20 +487,14 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         super.onStop();
     }
 
-    /*
-     * If we have just recorded a sample, this adds it to the media data base
-     * and sets the result to the sample's URI.
-     */
     private void saveSample() {
         if (mRecorder.sampleLength() == 0)
             return;
         if (!mSavedRecord.contains(mRecorder.sampleFile().getAbsolutePath())) {
-            Uri uri = null;
+            Uri uri;
             try {
                 uri = this.addToMediaDB(mRecorder.sampleFile());
-            } catch (UnsupportedOperationException ex) { // Database
-                // manipulation
-                // failure
+            } catch (UnsupportedOperationException ex) {
                 return;
             }
             if (uri == null) {
@@ -579,8 +530,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 + (AUDIO_AMR.equals(mRequestedType) ? FILE_EXTENSION_AMR : FILE_EXTENSION_3GPP);
 
         if (mRecorder.isRecordExisted(fileName) && !mShowFinishButton) {
-            // file already existed and it's not a recording request from other
-            // app
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
             dialogBuilder.setIcon(android.R.drawable.ic_dialog_alert);
             dialogBuilder.setTitle(getString(R.string.overwrite_dialog_title, fileName));
@@ -604,24 +553,19 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         }
     }
 
-    /*
-     * Called on destroy to unregister the SD card mount event receiver.
-     */
     @Override
     public void onDestroy() {
         if (mSDCardMountEventReceiver != null) {
             unregisterReceiver(mSDCardMountEventReceiver);
             mSDCardMountEventReceiver = null;
         }
-//        mSoundPool.release();
         unbinder.unbind();
         super.onDestroy();
     }
 
-    /*
-     * Registers an intent to listen for
+    /**
      * ACTION_MEDIA_EJECT/ACTION_MEDIA_UNMOUNTED/ACTION_MEDIA_MOUNTED
-     * notifications.
+     *
      */
     private void registerExternalStorageListener() {
         if (mSDCardMountEventReceiver == null) {
@@ -631,7 +575,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                     mSampleInterrupted = false;
                     mRecorder.reset();
                     resetFileNameEditText();
-                    updateUi(false);
+                    updateUi();
                 }
             };
             IntentFilter iFilter = new IntentFilter();
@@ -643,9 +587,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         }
     }
 
-    /*
-     * A simple utility to do a query into the databases.
-     */
+
     private Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                          String sortOrder) {
         try {
@@ -659,10 +601,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         }
     }
 
-    /*
-     * Add the given audioId to the playlist with the given playlistId; and
-     * maintain the play_order in the playlist.
-     */
     private void addToPlaylist(ContentResolver resolver, int audioId, long playlistId) {
         String[] cols = new String[]{
                 "count(*)"
@@ -678,9 +616,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         resolver.insert(uri, values);
     }
 
-    /*
-     * Obtain the id for the default play list from the audio_playlists table.
-     */
     private int getPlaylistId(Resources res) {
         Uri uri = MediaStore.Audio.Playlists.getContentUri("external");
         final String[] ids = new String[]{
@@ -705,10 +640,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         return id;
     }
 
-    /*
-     * Create a playlist with the given default playlist name, if no such
-     * playlist exists.
-     */
     private Uri createPlaylist(Resources res, ContentResolver resolver) {
         ContentValues cv = new ContentValues();
         cv.put(MediaStore.Audio.Playlists.NAME, res.getString(R.string.audio_db_playlist_name));
@@ -721,9 +652,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         return uri;
     }
 
-    /*
-     * Adds file and returns content uri.
-     */
+
     private Uri addToMediaDB(File file) {
         Resources res = getResources();
         ContentValues cv = new ContentValues();
@@ -735,8 +664,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         String title = formatter.format(date);
         long sampleLengthMillis = mRecorder.sampleLength() * 1000L;
 
-        // Lets label the recorded audio file as NON-MUSIC so that the file
-        // won't be displayed automatically, except for in the playlist.
         cv.put(MediaStore.Audio.Media.IS_MUSIC, "0");
 
         cv.put(MediaStore.Audio.Media.TITLE, title);
@@ -763,8 +690,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         int audioId = Integer.valueOf(result.getLastPathSegment());
         addToPlaylist(resolver, audioId, getPlaylistId(res));
 
-        // Notify those applications such as Music listening to the
-        // scanner events that a recorded audio file just created.
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, result));
         return result;
     }
@@ -814,10 +739,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         return image;
     }
 
-    /**
-     * Update the big MM:SS timer. If we are in playback, also update the
-     * progress bar.
-     */
     private void updateTimerView() {
         int state = mRecorder.state();
 
@@ -855,11 +776,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         }
     }
 
-    /*
-     * Called when we're in recording state. Find out how much longer we can go
-     * on recording. If it's under 5 minutes, we display a count-down in the UI.
-     * If we've run out of time, stop the recording.
-     */
     private void updateTimeRemaining() {
         long t = mRemainingTimeCalculator.timeRemaining();
 
@@ -933,10 +849,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         }
     }
 
-    /**
-     * Shows/hides the appropriate child views for the new state.
-     */
-    private void updateUi(boolean skipRewindAnimation) {
+    private void updateUi() {
         switch (mRecorder.state()) {
             case Recorder.IDLE_STATE:
                 mLastButtonId = 0;
@@ -974,23 +887,12 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
                 if (mRecorder.sampleLength() > 0) {
                     if (mRecorder.state() == Recorder.PLAYING_PAUSED_STATE) {
-//                        stopAnimation();
-//                        if (SoundRecorderPreferenceActivity.isEnabledSoundEffect(this)) {
-//                            mSoundPool.play(mPauseSound, 1.0f, 1.0f, 0, 0, 1);
-//                        }
+
                     } else {
                         mPlaySeekBar.setProgress(0);
-                        if (!skipRewindAnimation) {
-//                            stopRecordPlayingAnimation();
-                        } else {
-//                            stopAnimation();
-                        }
                     }
-                } else {
-//                    stopAnimation();
                 }
 
-                // we allow only one toast at one time
                 if (mSampleInterrupted && mErrorUiMessage == null) {
                     Toast.makeText(this, R.string.recording_stopped, Toast.LENGTH_SHORT).show();
                 }
@@ -1009,13 +911,10 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 mPauseButton.setVisibility(View.GONE);
                 mDeleteButton.setEnabled(false);
                 mStopButton.requestFocus();
-
                 mVUMeterLayout.setVisibility(View.VISIBLE);
                 mSeekBarLayout.setVisibility(View.GONE);
-
                 mFileNameEditText.setEnabled(false);
 
-//                startRecordPlayingAnimation();
                 mPreviousVUMax = 0;
                 break;
 
@@ -1028,16 +927,10 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 mPauseButton.setVisibility(View.VISIBLE);
                 mDeleteButton.setEnabled(false);
                 mPauseButton.requestFocus();
-
                 mVUMeterLayout.setVisibility(View.GONE);
                 mSeekBarLayout.setVisibility(View.VISIBLE);
-
                 mFileNameEditText.setEnabled(false);
 
-//                if (SoundRecorderPreferenceActivity.isEnabledSoundEffect(this)) {
-//                    mSoundPool.play(mPlaySound, 1.0f, 1.0f, 0, 0, 1);
-//                }
-//                startRecordPlayingAnimation();
                 break;
         }
 
@@ -1045,39 +938,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         updateSeekBar();
         updateVUMeterView();
 
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.clear();
-        if (mRecorder.state() == Recorder.RECORDING_STATE
-                || mRecorder.state() == Recorder.PLAYING_STATE) {
-            return false;
-        } else {
-//            getMenuInflater().inflate(R.layout.view_list_menu, menu);
-            return true;
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
-        /*switch (item.getItemId()) {
-            case R.id.menu_fm:
-                saveSample();
-                intent = new Intent();
-                intent.addCategory(Intent.CATEGORY_DEFAULT);
-                intent.setData(Uri.parse("file://" + mRecorder.getRecordDir()));
-                startActivity(intent);
-                break;
-            case R.id.menu_setting:
-                intent = new Intent(this, SoundRecorderPreferenceActivity.class);
-                startActivity(intent);
-                break;
-            default:
-                break;
-        }*/
-        return true;
     }
 
     private SeekBar.OnSeekBarChangeListener mSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
@@ -1091,7 +951,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-//            stopAnimation();
             mRecorder.startPlayback((float) seekBar.getProgress() / SEEK_BAR_MAX);
         }
 
@@ -1106,7 +965,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             if (fromUser) {
                 if (!mPlayingAnimation) {
                     mForwardAnimation = true;
-//                    startForwardAnimation();
                     mPlayingAnimation = true;
                     mProgress = progress;
                 }
@@ -1114,15 +972,11 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 if (progress >= mProgress + DELTA) {
                     if (!mForwardAnimation) {
                         mForwardAnimation = true;
-//                        stopAnimation();
-//                        startForwardAnimation();
                     }
                     mProgress = progress;
                 } else if (progress < mProgress - DELTA) {
                     if (mForwardAnimation) {
                         mForwardAnimation = false;
-//                        stopAnimation();
-//                        startBackwardAnimation();
                     }
                     mProgress = progress;
                 }

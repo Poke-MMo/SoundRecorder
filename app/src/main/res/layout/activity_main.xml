@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+
     <RelativeLayout
         android:id="@+id/rl_title"
         android:layout_width="match_parent"
@@ -15,34 +15,37 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="录音"
-            android:textSize="16dp"
+            android:layout_centerInParent="true"
+            android:text="@string/recording"
             android:textColor="@android:color/white"
-            android:layout_centerInParent="true"/>
+            android:textSize="@dimen/dp_16" />
+
         <Button
             android:id="@+id/btn_record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="历史记录"
-            android:textSize="14dp"
+            android:layout_alignParentRight="true"
             android:background="@null"
+            android:text="@string/history_record"
             android:textColor="@android:color/white"
-            android:layout_alignParentRight="true"/>
+            android:textSize="@dimen/dp_14" />
     </RelativeLayout>
+
     <LinearLayout
         android:id="@+id/time_calculator"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_marginTop="@dimen/dp_40"
         android:background="@android:color/black"
         android:orientation="horizontal"
-        android:layout_marginTop="@dimen/dp_40"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rl_title">
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@id/rl_title"></LinearLayout>
+
     <LinearLayout
         android:id="@+id/ll_name"
         android:layout_width="match_parent"
@@ -62,14 +65,15 @@
 
         <com.xp.soundrecorder.RecordNameEditText
             android:id="@+id/file_name"
-            android:layout_width="220dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/dp_220"
+            android:layout_height="@dimen/dp_25"
             android:background="#00000000"
-            android:hint="请输入音频名称"
             android:gravity="center"
+            android:hint="@string/enter_name"
             android:selectAllOnFocus="true"
             android:singleLine="true" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/ll_bar"
         android:layout_width="match_parent"
@@ -87,23 +91,22 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="horizontal" >
-        </LinearLayout>
+            android:orientation="horizontal"></LinearLayout>
 
         <LinearLayout
             android:id="@+id/play_seek_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/starttime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:textSize="15dp"
-                android:textColor="@android:color/black" />
+                android:paddingLeft="@dimen/dp_10"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/dp_15" />
 
             <SeekBar
                 android:id="@+id/play_seek_bar"
@@ -111,72 +114,73 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="horizontal"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp" />
+                android:paddingLeft="@dimen/dp_10"
+                android:paddingRight="@dimen/dp_10" />
 
             <TextView
                 android:id="@+id/totaltime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="10dp"
-                android:textSize="15dp"
-                android:textColor="@android:color/black" />
+                android:paddingRight="@dimen/dp_10"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/dp_15" />
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ll_bar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/ll_bar">
 
 
-            <ImageButton
-                android:id="@+id/newButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_new" />
+        <ImageButton
+            android:id="@+id/ib_new"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_new" />
 
-            <ImageButton
-                android:id="@+id/finishButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_finish"
-                android:visibility="gone" />
+        <ImageButton
+            android:id="@+id/ib_finish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_finish"
+            android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/recordButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_record" />
+        <ImageButton
+            android:id="@+id/ib_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_record" />
 
-            <ImageButton
-                android:id="@+id/stopButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_stop"
-                android:visibility="gone" />
+        <ImageButton
+            android:id="@+id/ib_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_stop"
+            android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/playButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_play"
-                android:visibility="gone" />
+        <ImageButton
+            android:id="@+id/ib_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_play"
+            android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/pauseButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_pause"
-                android:visibility="gone" />
+        <ImageButton
+            android:id="@+id/ib_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_pause"
+            android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/deleteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/btn_delete" />
+        <ImageButton
+            android:id="@+id/ib_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_delete" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

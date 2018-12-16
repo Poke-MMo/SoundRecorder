@@ -8,8 +8,6 @@
     <string name="max_length_reached" msgid="6398215743584093353">"已达到长度上限"</string>
     <string name="insert_sd_card" msgid="2251831579676114197">"需要SD卡才可使用"</string>
     <string name="button_ok" msgid="3004911343723076226">"确定"</string>
-    <!-- no translation found for audio_db_title_format (7912182366970749312) -->
-    <skip />
     <string name="audio_db_artist_name" msgid="961640229118120080">"您的录音"</string>
     <string name="audio_db_album_name" msgid="9072588113803264440">"录音"</string>
     <string name="audio_db_playlist_name" msgid="5592939050047058162">"我的录音"</string>
@@ -29,7 +27,7 @@
     <string name="pref_summary_enable_high_quality">高质量录音会增大录音文件</string>
     <string name="pref_title_enable_sound_effect">打开音效</string>
     <string name="pref_summary_enable_sound_effect">操作录音机时播放音效</string>
-    <string name="notification_recording">正在录音...</string>
+    <string name="notification_recording">正在录音…</string>
     <string name="notification_stopped">录音已终止</string>
     <string name="notification_warning">存储空间不足(小于%d分钟)</string>
     <string name="sd_card_not_available">SD卡不存在</string>
@@ -38,14 +36,14 @@
     <string name="prefDefault_recordType">audio/3gpp</string>
 
     <string name="timer_format"><xliff:g id="format">%02d</xliff:g>:<xliff:g id="format">%02d</xliff:g></string>
-    <!-- label shown before the user has recorded anything -->
 
-    <!-- the name under which recordings will be visible in the media database is formatted like this -->
     <string name="audio_db_title_format"><xliff:g id="format">yyyy-MM-dd HH:mm:ss</xliff:g></string>
     <string name="play">播放</string>
     <string name="pause">暂停</string>
-    <string name="playing">播放中...</string>
+    <string name="playing">播放中…</string>
     <string name="pausing">暂停中</string>
+    <string name="history_record">历史记录</string>
+    <string name="enter_name">请输入音频名称</string>
 
     <string-array name="prefEntries_recordType">
         <item>amr</item>

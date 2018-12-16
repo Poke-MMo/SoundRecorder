@@ -75,7 +75,7 @@ public class RecordActivity extends AppCompatActivity implements MediaPlayer.OnC
             @Override
             public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
                 mPath = mAdapter.getData().get(position).getPath();
-                showDeleteConfirmDialog();
+                showDeleteConfirmDialog(position);
             }
         });
     }
@@ -103,7 +103,7 @@ public class RecordActivity extends AppCompatActivity implements MediaPlayer.OnC
         return nameList;
     }
 
-    private void showDeleteConfirmDialog() {
+    private void showDeleteConfirmDialog(final int position) {
         AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(this);
         mDialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle(R.string.delete_dialog_title)
@@ -112,14 +112,16 @@ public class RecordActivity extends AppCompatActivity implements MediaPlayer.OnC
                     public void onClick(DialogInterface dialog, int which) {
                         if (mPath != null) {
                             mPath.delete();
+                            mAdapter.getData().remove(position);
+                            mAdapter.notifyDataSetChanged();
                         }
-                        mDialog.dismiss();
+                        dialog.dismiss();
                     }
                 }).setNegativeButton(android.R.string.cancel,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mDialog.dismiss();
+                        dialog.dismiss();
                     }
                 }).show();
     }
