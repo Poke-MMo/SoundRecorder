@@ -24,27 +24,15 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.OPENABLE" />
-
-                <data android:mimeType="audio/amr" />
-                <data android:mimeType="audio/3gpp" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.provider.MediaStore.RECORD_SOUND" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
 
         <service
             android:name=".RecorderService"
-            android:exported="false"></service>
+            android:exported="false"/>
 
-        <activity android:name=".RecordActivity"></activity>
+        <activity
+            android:name=".RecordActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

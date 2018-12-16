@@ -81,7 +81,7 @@ public class RecordActivity extends AppCompatActivity implements MediaPlayer.OnC
     }
 
     /**
-     * 读取指定目录下的所有.3gpp文件的文件名
+     * 读取指定目录下的所有文件的文件名
      *
      * @param files 路径
      * @return 文件名数组

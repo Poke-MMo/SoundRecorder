@@ -75,11 +75,11 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
 
     private RemainingTimeCalculator mRemainingTimeCalculator;
 
-    private NotificationManager mNotifiManager;
+    private NotificationManager mNotificationManager;
 
     private Notification mLowStorageNotification;
 
-    private TelephonyManager mTeleManager;
+    private TelephonyManager mTelephonyManager;
 
     private WakeLock mWakeLock;
 
@@ -113,9 +113,9 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
         mLowStorageNotification = null;
         mRemainingTimeCalculator = new RemainingTimeCalculator();
         mNeedUpdateRemainingTime = false;
-        mNotifiManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mTeleManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        mTeleManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SoundRecorder");
         mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
@@ -157,7 +157,7 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
 
     @Override
     public void onDestroy() {
-        mTeleManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
         if (mWakeLock.isHeld()) {
             mWakeLock.release();
         }
@@ -175,7 +175,7 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
         super.onLowMemory();
     }
 
-    private void localStartRecording(int outputfileformat, String path, boolean highQuality,
+    private void localStartRecording(int outputFileFormat, String path, boolean highQuality,
                                      long maxFileSize) {
         if (mRecorder == null) {
             mRemainingTimeCalculator.reset();
@@ -185,22 +185,21 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
 
             mRecorder = new MediaRecorder();
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            if (outputfileformat == MediaRecorder.OutputFormat.THREE_GPP) {
+            if (outputFileFormat == MediaRecorder.OutputFormat.THREE_GPP) {
                 mRemainingTimeCalculator.setBitRate(MainActivity.BITRATE_3GPP);
                 mRecorder.setAudioSamplingRate(highQuality ? 44100 : 22050);
-                mRecorder.setOutputFormat(outputfileformat);
+                mRecorder.setOutputFormat(outputFileFormat);
                 mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             } else {
                 mRemainingTimeCalculator.setBitRate(MainActivity.BITRATE_AMR);
                 mRecorder.setAudioSamplingRate(highQuality ? 16000 : 8000);
-                mRecorder.setOutputFormat(outputfileformat);
+                mRecorder.setOutputFormat(outputFileFormat);
                 mRecorder.setAudioEncoder(highQuality ? MediaRecorder.AudioEncoder.AMR_WB
                         : MediaRecorder.AudioEncoder.AMR_NB);
             }
             mRecorder.setOutputFile(path);
             mRecorder.setOnErrorListener(this);
 
-            // Handle IOException
             try {
                 mRecorder.prepare();
             } catch (IOException exception) {
@@ -210,12 +209,11 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
                 mRecorder = null;
                 return;
             }
-            // Handle RuntimeException if the recording couldn't start
             try {
                 mRecorder.start();
             } catch (RuntimeException exception) {
-                AudioManager audioMngr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                boolean isInCall = (audioMngr.getMode() == AudioManager.MODE_IN_CALL);
+                AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                boolean isInCall = (audioManager.getMode() == AudioManager.MODE_IN_CALL);
                 if (isInCall) {
                     sendErrorBroadcast(Recorder.IN_CALL_RECORD_ERROR);
                 } else {
@@ -252,16 +250,9 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
     }
 
     private void showRecordingNotification() {
-//        Notification notification = new Notification(R.drawable.stat_sys_call_record,
-//                getString(R.string.notification_recording), System.currentTimeMillis());
-//
         PendingIntent pendingIntent;
         pendingIntent = PendingIntent
                 .getActivity(this, 0, new Intent(this, MainActivity.class), 0);
-//
-//        notification.setLatestEventInfo(this, getString(R.string.app_name),
-//                getString(R.string.notification_recording), pendingIntent);
-//
 
         Notification notification = new Notification.Builder(this)
                 .setContentTitle(getString(R.string.app_name))
@@ -273,16 +264,10 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
         startForeground(NOTIFICATION_ID, notification);
     }
 
-    private void showLowStorageNotification(int minutes) {
+    private void showLowStorageNotification() {
         if (mKeyguardManager.inKeyguardRestrictedInputMode()) {
-            // it's not necessary to show this notification in lock-screen
             return;
         }
-
-
-//            mLowStorageNotification = new Notification(R.drawable.stat_sys_call_record_full,
-//                    getString(R.string.notification_recording), System.currentTimeMillis());
-
 
         PendingIntent pendingIntent;
         pendingIntent = PendingIntent
@@ -319,7 +304,7 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .build();
         notification.flags = Notification.FLAG_ONGOING_EVENT;
-        mNotifiManager.notify(NOTIFICATION_ID, notification);
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     private void sendStateBroadcast() {
@@ -339,10 +324,8 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
         if (t <= 0) {
             localStopRecording();
             return;
-        } else if (t <= 1800
-                && mRemainingTimeCalculator.currentLowerLimit() != RemainingTimeCalculator.FILE_SIZE_LIMIT) {
-            // less than half one hour
-            showLowStorageNotification((int) Math.ceil(t / 60.0));
+        } else if (t <= 1800 && mRemainingTimeCalculator.currentLowerLimit() != RemainingTimeCalculator.FILE_SIZE_LIMIT) {
+            showLowStorageNotification();
         }
 
         if (mRecorder != null && mNeedUpdateRemainingTime) {

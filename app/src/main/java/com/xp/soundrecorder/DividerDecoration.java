@@ -15,7 +15,7 @@ public class DividerDecoration extends RecyclerView.ItemDecoration {
         //设置画笔
         dividerPaint = new Paint();
         //设置分割线颜色
-        dividerPaint.setColor(context.getResources().getColor(R.color.colorAccent));
+        dividerPaint.setColor(context.getResources().getColor(R.color.colorPrimary));
         //设置分割线宽度
         dividerHeight = context.getResources().getDimensionPixelSize(R.dimen.divider_height);
     }

@@ -52,17 +52,9 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     private static final String TAG = "MainActivity";
     private Unbinder unbinder;
 
-    private static final String RECORDER_STATE_KEY = "recorder_state";
-
-    private static final String SAMPLE_INTERRUPTED_KEY = "sample_interrupted";
-
-    private static final String MAX_FILE_SIZE_KEY = "max_file_size";
-
     public static final String AUDIO_3GPP = "audio/3gpp";
 
     private static final String AUDIO_AMR = "audio/amr";
-
-    private static final String AUDIO_ANY = "audio/*";
 
     private static final String FILE_EXTENSION_AMR = ".amr";
 
@@ -128,36 +120,34 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         }
     };
     @BindView(R.id.ib_new)
-    ImageButton mNewButton;
+    ImageButton ibNew;
     @BindView(R.id.ib_finish)
-    ImageButton mFinishButton;
+    ImageButton ibFinish;
     @BindView(R.id.ib_record)
-    ImageButton mRecordButton;
+    ImageButton ibRecord;
     @BindView(R.id.ib_stop)
-    ImageButton mStopButton;
+    ImageButton ibStop;
     @BindView(R.id.ib_play)
-    ImageButton mPlayButton;
+    ImageButton ibPlay;
     @BindView(R.id.ib_pause)
-    ImageButton mPauseButton;
+    ImageButton ibPause;
     @BindView(R.id.ib_delete)
-    ImageButton mDeleteButton;
+    ImageButton ibDelete;
 
-    @BindView(R.id.file_name)
-    RecordNameEditText mFileNameEditText;
-    @BindView(R.id.time_calculator)
-    LinearLayout mTimerLayout;
-    @BindView(R.id.vumeter_layout)
-    LinearLayout mVUMeterLayout;
-    @BindView(R.id.play_seek_bar_layout)
-    LinearLayout mSeekBarLayout;
-    @BindView(R.id.starttime)
-    TextView mStartTime;
-    @BindView(R.id.totaltime)
-    TextView mTotalTime;
-    @BindView(R.id.play_seek_bar)
-    SeekBar mPlaySeekBar;
-
-    private BroadcastReceiver mSDCardMountEventReceiver = null;
+    @BindView(R.id.et_fileName)
+    RecordNameEditText etFileName;
+    @BindView(R.id.ll_timeCalculator)
+    LinearLayout llTimeCalculator;
+    @BindView(R.id.ll_vuMeter)
+    LinearLayout llVuMeter;
+    @BindView(R.id.ll_playSeekBar)
+    LinearLayout llPlaySeekBar;
+    @BindView(R.id.tv_startTime)
+    TextView tvStartTime;
+    @BindView(R.id.tv_totalTime)
+    TextView tvTotalTime;
+    @BindView(R.id.sb_play)
+    SeekBar sb_play;
 
     private int mPreviousVUMax;
 
@@ -176,17 +166,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
         initResourceRefs();
 
-        setResult(RESULT_CANCELED);
-        registerExternalStorageListener();
-        if (savedInstanceState != null) {
-            Bundle recorderState = savedInstanceState.getBundle(RECORDER_STATE_KEY);
-            if (recorderState != null) {
-                mRecorder.restoreState(recorderState);
-                mSampleInterrupted = recorderState.getBoolean(SAMPLE_INTERRUPTED_KEY, false);
-                mMaxFileSize = recorderState.getLong(MAX_FILE_SIZE_KEY, -1);
-            }
-        }
-
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         if (mShowFinishButton) {
@@ -199,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     private void initResourceRefs() {
 
         resetFileNameEditText();
-        mFileNameEditText.setNameChangeListener(new RecordNameEditText.OnNameChangeListener() {
+        etFileName.setNameChangeListener(new RecordNameEditText.OnNameChangeListener() {
             @Override
             public void onNameChanged(String name) {
                 if (!TextUtils.isEmpty(name)) {
@@ -208,15 +187,15 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             }
         });
 
-        mPlaySeekBar.setMax(SEEK_BAR_MAX);
-        mPlaySeekBar.setOnSeekBarChangeListener(mSeekBarChangeListener);
+        sb_play.setMax(SEEK_BAR_MAX);
+        sb_play.setOnSeekBarChangeListener(mSeekBarChangeListener);
 
         mTimerFormat = getResources().getString(R.string.timer_format);
 
         if (mShowFinishButton) {
-            mNewButton.setVisibility(View.GONE);
-            mFinishButton.setVisibility(View.VISIBLE);
-            mNewButton = mFinishButton;
+            ibNew.setVisibility(View.GONE);
+            ibFinish.setVisibility(View.VISIBLE);
+            ibNew = ibFinish;
         }
 
         mLastClickTime = 0;
@@ -231,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             extension = FILE_EXTENSION_3GPP;
         }
 
-        mFileNameEditText.initFileName(mRecorder.getRecordDir(), extension, mShowFinishButton);
+        etFileName.initFileName(mRecorder.getRecordDir(), extension, mShowFinishButton);
     }
 
     @OnClick({R.id.ib_new, R.id.ib_record, R.id.ib_stop,
@@ -258,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
         switch (v.getId()) {
             case R.id.ib_new:
-                mFileNameEditText.clearFocus();
+                etFileName.clearFocus();
                 saveSample();
                 mRecorder.reset();
                 resetFileNameEditText();
@@ -345,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 mRemainingTimeCalculator.setBitRate(BITRATE_AMR);
                 int outputFileFormat = isHighQuality ? MediaRecorder.OutputFormat.AMR_WB
                         : MediaRecorder.OutputFormat.AMR_NB;
-                mRecorder.startRecording(outputFileFormat, mFileNameEditText.getText().toString(),
+                mRecorder.startRecording(outputFileFormat, etFileName.getText().toString(),
                         FILE_EXTENSION_AMR, isHighQuality, mMaxFileSize);
             } else if (AUDIO_3GPP.equals(mRequestedType)) {
                 if (Build.MODEL.equals("HTC HD2")) {
@@ -353,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 }
 
                 mRemainingTimeCalculator.setBitRate(BITRATE_3GPP);
-                mRecorder.startRecording(MediaRecorder.OutputFormat.THREE_GPP, mFileNameEditText
+                mRecorder.startRecording(MediaRecorder.OutputFormat.THREE_GPP, etFileName
                         .getText().toString(), FILE_EXTENSION_3GPP, isHighQuality, mMaxFileSize);
             } else {
                 throw new IllegalArgumentException("Invalid output file type requested");
@@ -419,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             } else {
                 if (!mShowFinishButton) {
                     String fileName = mRecorder.sampleFile().getName().replace(preExtension, "");
-                    mFileNameEditText.setText(fileName);
+                    etFileName.setText(fileName);
                 }
 
                 if (AUDIO_AMR.equals(mRequestedType)) {
@@ -457,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 || mMaxFileSize != -1) {
             mRecorder.stop();
             saveSample();
-            mFileNameEditText.clearFocus();
+            etFileName.clearFocus();
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
                     .cancel(RecorderService.NOTIFICATION_ID);
         }
@@ -526,7 +505,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     }
 
     private void showOverwriteConfirmDialogIfConflicts() {
-        String fileName = mFileNameEditText.getText().toString()
+        String fileName = etFileName.getText().toString()
                 + (AUDIO_AMR.equals(mRequestedType) ? FILE_EXTENSION_AMR : FILE_EXTENSION_3GPP);
 
         if (mRecorder.isRecordExisted(fileName) && !mShowFinishButton) {
@@ -555,38 +534,9 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
     @Override
     public void onDestroy() {
-        if (mSDCardMountEventReceiver != null) {
-            unregisterReceiver(mSDCardMountEventReceiver);
-            mSDCardMountEventReceiver = null;
-        }
         unbinder.unbind();
         super.onDestroy();
     }
-
-    /**
-     * ACTION_MEDIA_EJECT/ACTION_MEDIA_UNMOUNTED/ACTION_MEDIA_MOUNTED
-     *
-     */
-    private void registerExternalStorageListener() {
-        if (mSDCardMountEventReceiver == null) {
-            mSDCardMountEventReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    mSampleInterrupted = false;
-                    mRecorder.reset();
-                    resetFileNameEditText();
-                    updateUi();
-                }
-            };
-            IntentFilter iFilter = new IntentFilter();
-            iFilter.addAction(Intent.ACTION_MEDIA_EJECT);
-            iFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-            iFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-            iFilter.addDataScheme("file");
-            registerReceiver(mSDCardMountEventReceiver, iFilter);
-        }
-    }
-
 
     private Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                          String sortOrder) {
@@ -646,7 +596,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         Uri uri = resolver.insert(MediaStore.Audio.Playlists.getContentUri("external"), cv);
         if (uri == null) {
             new AlertDialog.Builder(this).setTitle(R.string.app_name)
-                    .setMessage(R.string.error_mediadb_new_record)
+                    .setMessage(R.string.error_media_db_new_record)
                     .setPositiveButton(R.string.button_ok, null).setCancelable(false).show();
         }
         return uri;
@@ -674,13 +624,10 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         cv.put(MediaStore.Audio.Media.MIME_TYPE, mRequestedType);
         cv.put(MediaStore.Audio.Media.ARTIST, res.getString(R.string.audio_db_artist_name));
         cv.put(MediaStore.Audio.Media.ALBUM, res.getString(R.string.audio_db_album_name));
-        Log.d(TAG, "Inserting audio record: " + cv.toString());
         ContentResolver resolver = getContentResolver();
         Uri base = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        Log.d(TAG, "ContentURI: " + base);
         Uri result = resolver.insert(base, cv);
         if (result == null) {
-            Log.w(TAG, getString(R.string.error_mediadb_new_record));
             return null;
         }
 
@@ -746,9 +693,9 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
         long time = mRecorder.progress();
         String timeStr = String.format(mTimerFormat, time / 60, time % 60);
-        mTimerLayout.removeAllViews();
+        llTimeCalculator.removeAllViews();
         for (int i = 0; i < timeStr.length(); i++) {
-            mTimerLayout.addView(getTimerImage(timeStr.charAt(i)));
+            llTimeCalculator.addView(getTimerImage(timeStr.charAt(i)));
         }
 
         if (state == Recorder.RECORDING_STATE) {
@@ -763,15 +710,15 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     private void setTimerView(float progress) {
         long time = (long) (progress * mRecorder.sampleLength());
         String timeStr = String.format(mTimerFormat, time / 60, time % 60);
-        mTimerLayout.removeAllViews();
+        llTimeCalculator.removeAllViews();
         for (int i = 0; i < timeStr.length(); i++) {
-            mTimerLayout.addView(getTimerImage(timeStr.charAt(i)));
+            llTimeCalculator.addView(getTimerImage(timeStr.charAt(i)));
         }
     }
 
     private void updateSeekBar() {
         if (mRecorder.state() == Recorder.PLAYING_STATE) {
-            mPlaySeekBar.setProgress((int) (SEEK_BAR_MAX * mRecorder.playProgress()));
+            sb_play.setProgress((int) (SEEK_BAR_MAX * mRecorder.playProgress()));
             mHandler.postDelayed(mUpdateSeekBar, 10);
         }
     }
@@ -803,7 +750,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         final int MAX_VU_SIZE = 11;
         boolean showVUArray[] = new boolean[MAX_VU_SIZE];
 
-        if (mVUMeterLayout.getVisibility() == View.VISIBLE
+        if (llVuMeter.getVisibility() == View.VISIBLE
                 && mRecorder.state() == Recorder.RECORDING_STATE) {
             int vuSize = MAX_VU_SIZE * mRecorder.getMaxAmplitude() / 32768;
             if (vuSize >= MAX_VU_SIZE) {
@@ -827,15 +774,15 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             }
 
             mHandler.postDelayed(mUpdateVUMeter, 100);
-        } else if (mVUMeterLayout.getVisibility() == View.VISIBLE) {
+        } else if (llVuMeter.getVisibility() == View.VISIBLE) {
             mPreviousVUMax = 0;
             for (int i = 0; i < MAX_VU_SIZE; i++) {
                 showVUArray[i] = false;
             }
         }
 
-        if (mVUMeterLayout.getVisibility() == View.VISIBLE) {
-            mVUMeterLayout.removeAllViews();
+        if (llVuMeter.getVisibility() == View.VISIBLE) {
+            llVuMeter.removeAllViews();
             for (boolean show : showVUArray) {
                 ImageView imageView = new ImageView(this);
                 imageView.setBackgroundResource(R.mipmap.background_vumeter);
@@ -844,7 +791,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 }
                 imageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
-                mVUMeterLayout.addView(imageView);
+                llVuMeter.addView(imageView);
             }
         }
     }
@@ -855,41 +802,41 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 mLastButtonId = 0;
             case Recorder.PLAYING_PAUSED_STATE:
                 if (mRecorder.sampleLength() == 0) {
-                    mNewButton.setEnabled(true);
-                    mNewButton.setVisibility(View.VISIBLE);
-                    mRecordButton.setVisibility(View.VISIBLE);
-                    mStopButton.setVisibility(View.GONE);
-                    mPlayButton.setVisibility(View.GONE);
-                    mPauseButton.setVisibility(View.GONE);
-                    mDeleteButton.setEnabled(false);
-                    mRecordButton.requestFocus();
+                    ibNew.setEnabled(true);
+                    ibNew.setVisibility(View.VISIBLE);
+                    ibRecord.setVisibility(View.VISIBLE);
+                    ibStop.setVisibility(View.GONE);
+                    ibPlay.setVisibility(View.GONE);
+                    ibPause.setVisibility(View.GONE);
+                    ibDelete.setEnabled(false);
+                    ibRecord.requestFocus();
 
-                    mVUMeterLayout.setVisibility(View.VISIBLE);
-                    mSeekBarLayout.setVisibility(View.GONE);
+                    llVuMeter.setVisibility(View.VISIBLE);
+                    llPlaySeekBar.setVisibility(View.GONE);
                 } else {
-                    mNewButton.setEnabled(true);
-                    mNewButton.setVisibility(View.VISIBLE);
-                    mRecordButton.setVisibility(View.GONE);
-                    mStopButton.setVisibility(View.GONE);
-                    mPlayButton.setVisibility(View.VISIBLE);
-                    mPauseButton.setVisibility(View.GONE);
-                    mDeleteButton.setEnabled(true);
-                    mPauseButton.requestFocus();
+                    ibNew.setEnabled(true);
+                    ibNew.setVisibility(View.VISIBLE);
+                    ibRecord.setVisibility(View.GONE);
+                    ibStop.setVisibility(View.GONE);
+                    ibPlay.setVisibility(View.VISIBLE);
+                    ibPause.setVisibility(View.GONE);
+                    ibDelete.setEnabled(true);
+                    ibPause.requestFocus();
 
-                    mVUMeterLayout.setVisibility(View.GONE);
-                    mSeekBarLayout.setVisibility(View.VISIBLE);
-                    mStartTime.setText(String.format(mTimerFormat, 0, 0));
-                    mTotalTime.setText(String.format(mTimerFormat, mRecorder.sampleLength() / 60,
+                    llVuMeter.setVisibility(View.GONE);
+                    llPlaySeekBar.setVisibility(View.VISIBLE);
+                    tvStartTime.setText(String.format(mTimerFormat, 0, 0));
+                    tvTotalTime.setText(String.format(mTimerFormat, mRecorder.sampleLength() / 60,
                             mRecorder.sampleLength() % 60));
                 }
-                mFileNameEditText.setEnabled(true);
-                mFileNameEditText.clearFocus();
+                etFileName.setEnabled(true);
+                etFileName.clearFocus();
 
                 if (mRecorder.sampleLength() > 0) {
                     if (mRecorder.state() == Recorder.PLAYING_PAUSED_STATE) {
 
                     } else {
-                        mPlaySeekBar.setProgress(0);
+                        sb_play.setProgress(0);
                     }
                 }
 
@@ -903,33 +850,33 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
                 break;
             case Recorder.RECORDING_STATE:
-                mNewButton.setEnabled(false);
-                mNewButton.setVisibility(View.VISIBLE);
-                mRecordButton.setVisibility(View.GONE);
-                mStopButton.setVisibility(View.VISIBLE);
-                mPlayButton.setVisibility(View.GONE);
-                mPauseButton.setVisibility(View.GONE);
-                mDeleteButton.setEnabled(false);
-                mStopButton.requestFocus();
-                mVUMeterLayout.setVisibility(View.VISIBLE);
-                mSeekBarLayout.setVisibility(View.GONE);
-                mFileNameEditText.setEnabled(false);
+                ibNew.setEnabled(false);
+                ibNew.setVisibility(View.VISIBLE);
+                ibRecord.setVisibility(View.GONE);
+                ibStop.setVisibility(View.VISIBLE);
+                ibPlay.setVisibility(View.GONE);
+                ibPause.setVisibility(View.GONE);
+                ibDelete.setEnabled(false);
+                ibStop.requestFocus();
+                llVuMeter.setVisibility(View.VISIBLE);
+                llPlaySeekBar.setVisibility(View.GONE);
+                etFileName.setEnabled(false);
 
                 mPreviousVUMax = 0;
                 break;
 
             case Recorder.PLAYING_STATE:
-                mNewButton.setEnabled(false);
-                mNewButton.setVisibility(View.VISIBLE);
-                mRecordButton.setVisibility(View.GONE);
-                mStopButton.setVisibility(View.GONE);
-                mPlayButton.setVisibility(View.GONE);
-                mPauseButton.setVisibility(View.VISIBLE);
-                mDeleteButton.setEnabled(false);
-                mPauseButton.requestFocus();
-                mVUMeterLayout.setVisibility(View.GONE);
-                mSeekBarLayout.setVisibility(View.VISIBLE);
-                mFileNameEditText.setEnabled(false);
+                ibNew.setEnabled(false);
+                ibNew.setVisibility(View.VISIBLE);
+                ibRecord.setVisibility(View.GONE);
+                ibStop.setVisibility(View.GONE);
+                ibPlay.setVisibility(View.GONE);
+                ibPause.setVisibility(View.VISIBLE);
+                ibDelete.setEnabled(false);
+                ibPause.requestFocus();
+                llVuMeter.setVisibility(View.GONE);
+                llPlaySeekBar.setVisibility(View.VISIBLE);
+                etFileName.setEnabled(false);
 
                 break;
         }
