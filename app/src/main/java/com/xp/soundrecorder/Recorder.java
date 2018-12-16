@@ -16,10 +16,6 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     private static final String TAG = "Recorder";
     private static final String SAMPLE_PREFIX = "recording";
 
-    private static final String SAMPLE_PATH_KEY = "sample_path";
-
-    private static final String SAMPLE_LENGTH_KEY = "sample_length";
-
     public static final String SAMPLE_DEFAULT_DIR = "/sound_recorder";
 
     public static final int IDLE_STATE = 0;
@@ -50,14 +46,13 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
 
     private OnStateChangedListener mOnStateChangedListener = null;
 
-    private long mSampleStart = 0; // time at which latest record or play
-    // operation started
+    private long mSampleStart = 0;
 
-    private int mSampleLength = 0; // length of current sample
+    private int mSampleLength = 0;
 
     private File mSampleFile = null;
 
-    private File mSampleDir = null;
+    private File mSampleDir;
 
     private MediaPlayer mPlayer = null;
 
@@ -80,20 +75,12 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
             mSampleFile = new File(RecorderService.getFilePath());
             return true;
         } else if (mState == RECORDING_STATE) {
-            // service is idle but local state is recording
             return false;
         } else if (mSampleFile != null && mSampleLength == 0) {
-            // this state can be reached if there is an incoming call
-            // the record service is stopped by incoming call without notifying
-            // the UI
+
             return false;
         }
         return true;
-    }
-
-    public void saveState(Bundle recorderState) {
-        recorderState.putString(SAMPLE_PATH_KEY, mSampleFile.getAbsolutePath());
-        recorderState.putInt(SAMPLE_LENGTH_KEY, mSampleLength);
     }
 
     public String getRecordDir() {
@@ -104,28 +91,6 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
         if (mState != RECORDING_STATE)
             return 0;
         return RecorderService.getMaxAmplitude();
-    }
-
-    public void restoreState(Bundle recorderState) {
-        String samplePath = recorderState.getString(SAMPLE_PATH_KEY);
-        if (samplePath == null)
-            return;
-        int sampleLength = recorderState.getInt(SAMPLE_LENGTH_KEY, -1);
-        if (sampleLength == -1)
-            return;
-
-        File file = new File(samplePath);
-        if (!file.exists())
-            return;
-        if (mSampleFile != null
-                && mSampleFile.getAbsolutePath().compareTo(file.getAbsolutePath()) == 0)
-            return;
-
-        delete();
-        mSampleFile = file;
-        mSampleLength = sampleLength;
-
-        signalStateChanged(IDLE_STATE);
     }
 
     public void setOnStateChangedListener(OnStateChangedListener listener) {
@@ -141,7 +106,7 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
             return (int) ((System.currentTimeMillis() - mSampleStart) / 1000);
         } else if (mState == PLAYING_STATE || mState == PLAYING_PAUSED_STATE) {
             if (mPlayer != null) {
-                return (int) (mPlayer.getCurrentPosition() / 1000);
+                return (mPlayer.getCurrentPosition() / 1000);
             }
         }
 
@@ -245,7 +210,6 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
             RecorderService.stopRecording(mContext);
             mSampleLength = (int) ((System.currentTimeMillis() - mSampleStart) / 1000);
             if (mSampleLength == 0) {
-                // round up to 1 second if it's too short
                 mSampleLength = 1;
             }
         }
@@ -294,7 +258,7 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     }
 
     public void stopPlayback() {
-        if (mPlayer == null) // we were not in playback
+        if (mPlayer == null)
             return;
 
         mPlayer.stop();
