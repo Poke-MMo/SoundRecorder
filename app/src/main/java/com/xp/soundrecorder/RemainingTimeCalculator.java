@@ -15,63 +15,45 @@ public class RemainingTimeCalculator {
 
     private static final int EXTERNAL_STORAGE_BLOCK_THREAD_HOLD = 32;
 
-    // which of the two limits we will hit (or have fit) first
     private int mCurrentLowerLimit = UNKNOWN_LIMIT;
 
-    // State for tracking file size of recording.
+    // 用于跟踪记录的文件大小的状态
     private File mRecordingFile;
 
     private long mMaxBytes;
 
-    // Rate at which the file grows
+    // 文件增长的速度
     private int mBytesPerSecond;
 
-    // time at which number of free blocks last changed
+    // 最后更改时间
     private long mBlocksChangedTime;
 
-    // number of available blocks at that time
     private long mLastBlocks;
 
-    // time at which the size of the file has last changed
+    // 文件大小最后更改的时间
     private long mFileSizeChangedTime;
 
-    // size of the file at that time
     private long mLastFileSize;
 
     public RemainingTimeCalculator() {
     }
 
-    /**
-     * If called, the calculator will return the minimum of two estimates: how
-     * long until we run out of disk space and how long until the file reaches
-     * the specified size.
-     *
-     * @param file the file to watch
-     * @param maxBytes the limit
-     */
 
     public void setFileSizeLimit(File file, long maxBytes) {
         mRecordingFile = file;
         mMaxBytes = maxBytes;
     }
 
-    /**
-     * Resets the interpolation.
-     */
     public void reset() {
         mCurrentLowerLimit = UNKNOWN_LIMIT;
         mBlocksChangedTime = -1;
         mFileSizeChangedTime = -1;
     }
 
-    /**
-     * Returns how long (in seconds) we can continue recording.
-     */
     public long timeRemaining() {
-        // Calculate how long we can record based on free disk space
-        StatFs fs = null;
-        long blocks = -1;
-        long blockSize = -1;
+        StatFs fs;
+        long blocks;
+        long blockSize;
         long now = System.currentTimeMillis();
 
         fs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
@@ -86,16 +68,8 @@ public class RemainingTimeCalculator {
             mLastBlocks = blocks;
         }
 
-        /*
-         * The calculation below always leaves one free block, since free space
-         * in the block we're currently writing to is not added. This last block
-         * might get nibbled when we close and flush the file, but we won't run
-         * out of disk.
-         */
-
-        // at mBlocksChangedTime we had this much time
         long result = mLastBlocks * blockSize / mBytesPerSecond;
-        // so now we have this much time
+
         result -= (now - mBlocksChangedTime) / 1000;
 
         if (mRecordingFile == null) {
@@ -103,8 +77,6 @@ public class RemainingTimeCalculator {
             return result;
         }
 
-        // If we have a recording file set, we calculate a second estimate
-        // based on how long it will take us to reach mMaxBytes.
 
         mRecordingFile = new File(mRecordingFile.getAbsolutePath());
         long fileSize = mRecordingFile.length();
@@ -115,36 +87,24 @@ public class RemainingTimeCalculator {
 
         long result2 = (mMaxBytes - fileSize) / mBytesPerSecond;
         result2 -= (now - mFileSizeChangedTime) / 1000;
-        result2 -= 1; // just for safety
+        result2 -= 1;
 
         mCurrentLowerLimit = result < result2 ? DISK_SPACE_LIMIT : FILE_SIZE_LIMIT;
 
         return Math.min(result, result2);
     }
 
-    /**
-     * Indicates which limit we will hit (or have hit) first, by returning one
-     * of FILE_SIZE_LIMIT or DISK_SPACE_LIMIT or UNKNOWN_LIMIT. We need this to
-     * display the correct message to the user when we hit one of the limits.
-     */
     public int currentLowerLimit() {
         return mCurrentLowerLimit;
     }
 
-    /**
-     * Is there any point of trying to start recording?
-     */
+
     public boolean diskSpaceAvailable() {
         StatFs fs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
-        // keep one free block
         return fs.getAvailableBlocks() > EXTERNAL_STORAGE_BLOCK_THREAD_HOLD;
     }
 
-    /**
-     * Sets the bit rate used in the interpolation.
-     *
-     * @param bitRate the bit rate to set in bits/sec.
-     */
+
     public void setBitRate(int bitRate) {
         mBytesPerSecond = bitRate / 8;
     }

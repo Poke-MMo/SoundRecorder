@@ -329,11 +329,11 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
         return mStartTime;
     }
 
-    public static void startRecording(Context context, int outputfileformat, String path,
+    public static void startRecording(Context context, int outputFileFormat, String path,
                                       boolean highQuality, long maxFileSize) {
         Intent intent = new Intent(context, RecorderService.class);
         intent.putExtra(ACTION_NAME, ACTION_START_RECORDING);
-        intent.putExtra(ACTION_PARAM_FORMAT, outputfileformat);
+        intent.putExtra(ACTION_PARAM_FORMAT, outputFileFormat);
         intent.putExtra(ACTION_PARAM_PATH, path);
         intent.putExtra(ACTION_PARAM_HIGH_QUALITY, highQuality);
         intent.putExtra(ACTION_PARAM_MAX_FILE_SIZE, maxFileSize);

@@ -94,7 +94,7 @@ public class RecordActivity extends AppCompatActivity implements MediaPlayer.OnC
                     getFileName(file.listFiles());
                 } else {
                     String fileName = file.getName();
-                    if (fileName.endsWith(".3gpp")) {
+                    if (fileName.endsWith(".amr")) {
                         nameList.add(new RecordEntity(file.getAbsoluteFile(), fileName));
                     }
                 }

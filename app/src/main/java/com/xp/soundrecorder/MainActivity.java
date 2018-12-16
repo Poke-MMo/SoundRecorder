@@ -66,9 +66,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
     private static final int SEEK_BAR_MAX = 10000;
 
-    private String mRequestedType = AUDIO_3GPP;
-
-    private boolean mCanRequestChanged = false;
+    private String mRequestedType = AUDIO_AMR;
 
     private Recorder mRecorder;
 
@@ -206,7 +204,8 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         String extension = "";
         if (AUDIO_AMR.equals(mRequestedType)) {
             extension = FILE_EXTENSION_AMR;
-        } else if (AUDIO_3GPP.equals(mRequestedType)) {
+        }
+        else if (AUDIO_3GPP.equals(mRequestedType)) {
             extension = FILE_EXTENSION_3GPP;
         }
 
@@ -270,12 +269,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         startActivity(new Intent(MainActivity.this, RecordActivity.class));
     }
 
-    private void stopAudioPlayback() {
-        Intent i = new Intent("com.android.music.musicservicecommand");
-        i.putExtra("command", "pause");
-        sendBroadcast(i);
-    }
-
     @Override
     public void onStateChanged(int state) {
         if (state == Recorder.PLAYING_STATE || state == Recorder.RECORDING_STATE) {
@@ -317,19 +310,14 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             mErrorUiMessage = getResources().getString(R.string.storage_is_full);
             updateUi();
         } else {
-            stopAudioPlayback();
 
-            boolean isHighQuality = SoundRecorderPreferenceActivity.isHighQuality(this);
+            boolean isHighQuality = true;
             if (AUDIO_AMR.equals(mRequestedType)) {
                 mRemainingTimeCalculator.setBitRate(BITRATE_AMR);
-                int outputFileFormat = isHighQuality ? MediaRecorder.OutputFormat.AMR_WB
-                        : MediaRecorder.OutputFormat.AMR_NB;
+                int outputFileFormat = MediaRecorder.OutputFormat.AMR_WB;
                 mRecorder.startRecording(outputFileFormat, etFileName.getText().toString(),
                         FILE_EXTENSION_AMR, isHighQuality, mMaxFileSize);
             } else if (AUDIO_3GPP.equals(mRequestedType)) {
-                if (Build.MODEL.equals("HTC HD2")) {
-                    isHighQuality = false;
-                }
 
                 mRemainingTimeCalculator.setBitRate(BITRATE_3GPP);
                 mRecorder.startRecording(MediaRecorder.OutputFormat.THREE_GPP, etFileName
@@ -375,14 +363,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     @Override
     protected void onResume() {
         super.onResume();
-        String type = SoundRecorderPreferenceActivity.getRecordType(this);
-        if (mCanRequestChanged && !TextUtils.equals(type, mRequestedType)) {
-            saveSample();
-            mRecorder.reset();
-            mRequestedType = type;
-            resetFileNameEditText();
-        }
-        mCanRequestChanged = false;
 
         if (!mRecorder.syncStateWithService()) {
             mRecorder.reset();
@@ -445,7 +425,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             unregisterReceiver(mReceiver);
         }
 
-        mCanRequestChanged = true;
         mStopUiUpdate = true;
 
         if (RecorderService.isRecording()) {
@@ -486,22 +465,20 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
     private void showDeleteConfirmDialog() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        dialogBuilder.setIcon(android.R.drawable.ic_dialog_alert);
-        dialogBuilder.setTitle(R.string.delete_dialog_title);
-        dialogBuilder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        dialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.delete_dialog_title)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mRecorder.delete();
             }
-        });
-        dialogBuilder.setNegativeButton(android.R.string.cancel,
+        }).setNegativeButton(android.R.string.cancel,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mLastButtonId = 0;
                     }
-                });
-        dialogBuilder.show();
+                }).show();
     }
 
     private void showOverwriteConfirmDialogIfConflicts() {
