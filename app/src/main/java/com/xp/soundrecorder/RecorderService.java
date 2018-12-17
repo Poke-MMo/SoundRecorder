@@ -260,7 +260,7 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
         if (mLowStorageNotification == null) {
             mLowStorageNotification = new Notification.Builder(this)
                     .setContentTitle(getString(R.string.app_name))
-                    .setContentText(getString(R.string.notification_recording))
+                    .setContentText(getString(R.string.notification_warning))
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .build();
@@ -284,7 +284,7 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
 
         Notification notification = new Notification.Builder(this)
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.notification_recording))
+                .setContentText(getString(R.string.notification_stopped))
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .build();

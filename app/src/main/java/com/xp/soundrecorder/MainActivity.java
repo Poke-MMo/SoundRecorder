@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         }
         if (message != null) {
             new AlertDialog.Builder(this).setTitle(R.string.app_name).setMessage(message)
-                    .setPositiveButton(R.string.button_ok, null).setCancelable(false).show();
+                    .setPositiveButton(R.string.confirm, null).setCancelable(false).show();
         }
     }
 
@@ -492,23 +492,22 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
 
         if (mRecorder.isRecordExisted(fileName) && !mShowFinishButton) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-            dialogBuilder.setIcon(android.R.drawable.ic_dialog_alert);
-            dialogBuilder.setTitle(getString(R.string.overwrite_dialog_title, fileName));
-            dialogBuilder.setPositiveButton(android.R.string.ok,
+            dialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(getString(R.string.overwrite_dialog_title, fileName))
+                    .setPositiveButton(android.R.string.ok,
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             startRecording();
                         }
-                    });
-            dialogBuilder.setNegativeButton(android.R.string.cancel,
+                    }).setNegativeButton(android.R.string.cancel,
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             mLastButtonId = 0;
                         }
-                    });
-            dialogBuilder.show();
+                    })
+                    .show();
         } else {
             startRecording();
         }
