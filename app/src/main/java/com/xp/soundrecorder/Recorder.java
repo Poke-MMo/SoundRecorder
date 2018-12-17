@@ -4,7 +4,6 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
-import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -225,10 +224,9 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
             setState(PLAYING_STATE);
         } else {
             stop();
-
             mPlayer = new MediaPlayer();
             try {
-                Log.e(TAG, "startPlayback: "+mSampleFile.getAbsolutePath());
+                Log.e(TAG, "startPlayback: " + mSampleFile.getAbsolutePath());
                 mPlayer.setDataSource(mSampleFile.getAbsolutePath());
                 mPlayer.setOnCompletionListener(this);
                 mPlayer.setOnErrorListener(this);

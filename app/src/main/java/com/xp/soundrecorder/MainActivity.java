@@ -3,21 +3,16 @@ package com.xp.soundrecorder;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -31,9 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -76,8 +69,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     private RemainingTimeCalculator mRemainingTimeCalculator;
 
     private String mTimerFormat;
-
-    private HashSet<String> mSavedRecord;
 
     private long mLastClickTime;
 
@@ -159,12 +150,8 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         mRecorder.setOnStateChangedListener(this);
         mReceiver = new RecorderReceiver();
         mRemainingTimeCalculator = new RemainingTimeCalculator();
-        mSavedRecord = new HashSet<>();
-
         initResourceRefs();
-
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
         if (mShowFinishButton) {
             mRecorder.reset();
             resetFileNameEditText();
@@ -235,7 +222,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         switch (v.getId()) {
             case R.id.ib_new:
                 etFileName.clearFocus();
-                saveSample();
                 mRecorder.reset();
                 resetFileNameEditText();
                 break;
@@ -253,7 +239,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 break;
             case R.id.ib_finish:
                 mRecorder.stop();
-                saveSample();
                 finish();
                 break;
             case R.id.ib_delete:
@@ -319,7 +304,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 mRecorder.startRecording(outputFileFormat, etFileName.getText().toString(),
                         FILE_EXTENSION_AMR, true, mMaxFileSize);
             } else if (AUDIO_3GPP.equals(mRequestedType)) {
-
                 mRemainingTimeCalculator.setBitRate(BITRATE_3GPP);
                 mRecorder.startRecording(MediaRecorder.OutputFormat.THREE_GPP, etFileName
                         .getText().toString(), FILE_EXTENSION_3GPP, true, mMaxFileSize);
@@ -339,14 +323,10 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             switch (mRecorder.state()) {
                 case Recorder.IDLE_STATE:
                 case Recorder.PLAYING_PAUSED_STATE:
-                    if (mRecorder.sampleLength() > 0) {
-                        saveSample();
-                    }
                     finish();
                     break;
                 case Recorder.PLAYING_STATE:
                     mRecorder.stop();
-                    saveSample();
                     break;
                 case Recorder.RECORDING_STATE:
                     if (mShowFinishButton) {
@@ -374,8 +354,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         }
 
         if (mRecorder.state() == Recorder.RECORDING_STATE) {
-            String preExtension = AUDIO_AMR.equals(mRequestedType) ? FILE_EXTENSION_AMR
-                    : FILE_EXTENSION_3GPP;
+            String preExtension = AUDIO_AMR.equals(mRequestedType) ? FILE_EXTENSION_AMR : FILE_EXTENSION_3GPP;
             if (!mRecorder.sampleFile().getName().endsWith(preExtension)) {
                 mRecorder.reset();
                 resetFileNameEditText();
@@ -384,7 +363,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                     String fileName = mRecorder.sampleFile().getName().replace(preExtension, "");
                     etFileName.setText(fileName);
                 }
-
                 if (AUDIO_AMR.equals(mRequestedType)) {
                     mRemainingTimeCalculator.setBitRate(BITRATE_AMR);
                 } else if (AUDIO_3GPP.equals(mRequestedType)) {
@@ -419,9 +397,8 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         if (mRecorder.state() != Recorder.RECORDING_STATE || mShowFinishButton
                 || mMaxFileSize != -1) {
             mRecorder.stop();
-            saveSample();
             etFileName.clearFocus();
-            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
+            ((NotificationManager) Objects.requireNonNull(getSystemService(Context.NOTIFICATION_SERVICE)))
                     .cancel(RecorderService.NOTIFICATION_ID);
         }
 
@@ -447,25 +424,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             finish();
         }
         super.onStop();
-    }
-
-    private void saveSample() {
-        if (mRecorder.sampleLength() == 0) {
-            return;
-        }
-        if (!mSavedRecord.contains(mRecorder.sampleFile().getAbsolutePath())) {
-            Uri uri;
-            try {
-                uri = this.addToMediaDB(mRecorder.sampleFile());
-            } catch (UnsupportedOperationException ex) {
-                return;
-            }
-            if (uri == null) {
-                return;
-            }
-            mSavedRecord.add(mRecorder.sampleFile().getAbsolutePath());
-            setResult(RESULT_OK, new Intent().setData(uri));
-        }
     }
 
     private void showDeleteConfirmDialog() {
@@ -495,12 +453,12 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             dialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(getString(R.string.overwrite_dialog_title, fileName))
                     .setPositiveButton(android.R.string.ok,
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            startRecording();
-                        }
-                    }).setNegativeButton(android.R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    startRecording();
+                                }
+                            }).setNegativeButton(android.R.string.cancel,
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -517,89 +475,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     public void onDestroy() {
         unbinder.unbind();
         super.onDestroy();
-    }
-
-    private Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-                         String sortOrder) {
-        try {
-            ContentResolver resolver = getContentResolver();
-            if (resolver == null) {
-                return null;
-            }
-            return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
-        } catch (UnsupportedOperationException ex) {
-            return null;
-        }
-    }
-
-    private void addToPlaylist(ContentResolver resolver, int audioId, long playlistId) {
-        String[] cols = new String[]{
-                "count(*)"
-        };
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
-        Cursor cur = resolver.query(uri, cols, null, null, null);
-        cur.moveToFirst();
-        final int base = cur.getInt(0);
-        cur.close();
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, Integer.valueOf(base + audioId));
-        values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, audioId);
-        resolver.insert(uri, values);
-    }
-
-    private int getPlaylistId(Resources res) {
-        Uri uri = MediaStore.Audio.Playlists.getContentUri("external");
-        final String[] ids = new String[]{
-                MediaStore.Audio.Playlists._ID
-        };
-        final String where = MediaStore.Audio.Playlists.NAME + "=?";
-        final String[] args = new String[]{
-                res.getString(R.string.audio_db_playlist_name)
-        };
-        Cursor cursor = query(uri, ids, where, args, null);
-        int id = -1;
-        if (cursor != null) {
-            cursor.moveToFirst();
-            if (!cursor.isAfterLast()) {
-                id = cursor.getInt(0);
-            }
-            cursor.close();
-        }
-        return id;
-    }
-
-    private Uri addToMediaDB(File file) {
-        Resources res = getResources();
-        ContentValues cv = new ContentValues();
-        long current = System.currentTimeMillis();
-        long modDate = file.lastModified();
-        Date date = new Date(current);
-        SimpleDateFormat formatter = new SimpleDateFormat(
-                res.getString(R.string.audio_db_title_format));
-        String title = formatter.format(date);
-        long sampleLengthMillis = mRecorder.sampleLength() * 1000L;
-
-        cv.put(MediaStore.Audio.Media.IS_MUSIC, "0");
-
-        cv.put(MediaStore.Audio.Media.TITLE, title);
-        cv.put(MediaStore.Audio.Media.DATA, file.getAbsolutePath());
-        cv.put(MediaStore.Audio.Media.DATE_ADDED, (int) (current / 1000));
-        cv.put(MediaStore.Audio.Media.DATE_MODIFIED, (int) (modDate / 1000));
-        cv.put(MediaStore.Audio.Media.DURATION, sampleLengthMillis);
-        cv.put(MediaStore.Audio.Media.MIME_TYPE, mRequestedType);
-        cv.put(MediaStore.Audio.Media.ARTIST, res.getString(R.string.audio_db_artist_name));
-        cv.put(MediaStore.Audio.Media.ALBUM, res.getString(R.string.audio_db_album_name));
-        ContentResolver resolver = getContentResolver();
-        Uri base = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        Uri result = resolver.insert(base, cv);
-        if (result == null) {
-            return null;
-        }
-        int audioId = Integer.valueOf(result.getLastPathSegment());
-        addToPlaylist(resolver, audioId, getPlaylistId(res));
-
-        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, result));
-        return result;
     }
 
     private ImageView getTimerImage(char number) {
@@ -727,13 +602,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             }
 
             for (int i = 0; i < maxVuSize; i++) {
-                if (i <= vuSize) {
-                    showVUArray[i] = true;
-                } else if (i == mPreviousVUMax) {
-                    showVUArray[i] = true;
-                } else {
-                    showVUArray[i] = false;
-                }
+                showVUArray[i] = i <= vuSize || i == mPreviousVUMax;
             }
 
             mHandler.postDelayed(mUpdateVUMeter, 100);
@@ -796,9 +665,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
                 etFileName.clearFocus();
 
                 if (mRecorder.sampleLength() > 0) {
-                    if (mRecorder.state() == Recorder.PLAYING_PAUSED_STATE) {
-
-                    } else {
+                    if (mRecorder.state() != Recorder.PLAYING_PAUSED_STATE) {
                         sbPlay.setProgress(0);
                     }
                 }
@@ -853,13 +720,6 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
     }
 
     private SeekBar.OnSeekBarChangeListener mSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
-        private final int DELTA = SEEK_BAR_MAX / 20;
-
-        private int mProgress = 0;
-
-        private boolean mPlayingAnimation = false;
-
-        private boolean mForwardAnimation = true;
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
@@ -869,30 +729,11 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
             mRecorder.pausePlayback();
-            mPlayingAnimation = false;
         }
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (fromUser) {
-                if (!mPlayingAnimation) {
-                    mForwardAnimation = true;
-                    mPlayingAnimation = true;
-                    mProgress = progress;
-                }
-
-                if (progress >= mProgress + DELTA) {
-                    if (!mForwardAnimation) {
-                        mForwardAnimation = true;
-                    }
-                    mProgress = progress;
-                } else if (progress < mProgress - DELTA) {
-                    if (mForwardAnimation) {
-                        mForwardAnimation = false;
-                    }
-                    mProgress = progress;
-                }
-
                 setTimerView(((float) progress) / SEEK_BAR_MAX);
                 mLastButtonId = 0;
             }
