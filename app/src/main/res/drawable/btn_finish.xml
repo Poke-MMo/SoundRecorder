@@ -3,14 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:state_enabled="false"
-        android:drawable="@mipmap/btn_finish_disabled" />
+        android:drawable="@drawable/btn_finish_disabled" />
     <item
         android:state_focused="true"
-        android:drawable="@mipmap/btn_finish_pressed"
+        android:drawable="@drawable/btn_finish_pressed"
         />
     <item
         android:state_pressed="true"
-        android:drawable="@mipmap/btn_finish_pressed" />
+        android:drawable="@drawable/btn_finish_pressed" />
     <item
-        android:drawable="@mipmap/btn_finish_normal" />
+        android:drawable="@drawable/btn_finish_normal" />
 </selector>

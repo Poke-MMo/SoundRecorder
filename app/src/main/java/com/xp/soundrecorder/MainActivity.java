@@ -607,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
         ImageView image = new ImageView(this);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         if (number != ':') {
-            image.setBackgroundResource(R.mipmap.background_number);
+            image.setBackgroundResource(R.drawable.background_number);
         }
         switch (number) {
             case '0':
@@ -749,7 +749,7 @@ public class MainActivity extends AppCompatActivity implements Recorder.OnStateC
             llVuMeter.removeAllViews();
             for (boolean show : showVUArray) {
                 ImageView imageView = new ImageView(this);
-                imageView.setBackgroundResource(R.mipmap.background_vumeter);
+                imageView.setBackgroundResource(R.drawable.background_vumeter);
                 if (show) {
                     imageView.setImageResource(R.mipmap.icon_vumeter);
                 }

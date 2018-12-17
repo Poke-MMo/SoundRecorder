@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:state_enabled="false"
-        android:drawable="@mipmap/btn_new_disabled" />
+        android:drawable="@drawable/btn_new_disabled" />
     <item
         android:state_focused="true"
-        android:drawable="@mipmap/btn_new_pressed" />
+        android:drawable="@drawable/btn_new_pressed" />
     <item
         android:state_pressed="true"
-        android:drawable="@mipmap/btn_new_pressed" />
+        android:drawable="@drawable/btn_new_pressed" />
     <item
-        android:drawable="@mipmap/btn_new_normal" />
+        android:drawable="@drawable/btn_new_normal" />
 </selector>
