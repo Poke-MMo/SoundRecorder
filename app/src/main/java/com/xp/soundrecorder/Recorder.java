@@ -88,8 +88,9 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     }
 
     public int getMaxAmplitude() {
-        if (mState != RECORDING_STATE)
+        if (mState != RECORDING_STATE) {
             return 0;
+        }
         return RecorderService.getMaxAmplitude();
     }
 
@@ -146,8 +147,9 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     public void delete() {
         stop();
 
-        if (mSampleFile != null)
+        if (mSampleFile != null) {
             mSampleFile.delete();
+        }
 
         mSampleFile = null;
         mSampleLength = 0;
@@ -258,8 +260,9 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     }
 
     public void stopPlayback() {
-        if (mPlayer == null)
+        if (mPlayer == null) {
             return;
+        }
 
         mPlayer.stop();
         mPlayer.release();
@@ -272,31 +275,36 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
         stopPlayback();
     }
 
+    @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         stop();
         setError(STORAGE_ACCESS_ERROR);
         return true;
     }
 
+    @Override
     public void onCompletion(MediaPlayer mp) {
         stop();
     }
 
     public void setState(int state) {
-        if (state == mState)
+        if (state == mState) {
             return;
+        }
 
         mState = state;
         signalStateChanged(mState);
     }
 
     private void signalStateChanged(int state) {
-        if (mOnStateChangedListener != null)
+        if (mOnStateChangedListener != null) {
             mOnStateChangedListener.onStateChanged(state);
+        }
     }
 
     public void setError(int error) {
-        if (mOnStateChangedListener != null)
+        if (mOnStateChangedListener != null) {
             mOnStateChangedListener.onError(error);
+        }
     }
 }

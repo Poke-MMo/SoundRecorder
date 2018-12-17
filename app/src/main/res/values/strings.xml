@@ -38,11 +38,12 @@
 
     <string name="audio_db_title_format"><xliff:g id="format">yyyy-MM-dd HH:mm:ss</xliff:g></string>
     <string name="play">播放</string>
-    <string name="pause">暂停</string>
     <string name="playing">播放中…</string>
     <string name="pausing">暂停中</string>
     <string name="history_record">历史记录</string>
     <string name="enter_name">请输入音频名称</string>
+    <string name="stop">停止</string>
+    <string name="pause">暂停</string>
 
     <string-array name="prefEntries_recordType">
         <item>amr</item>

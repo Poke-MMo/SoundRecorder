@@ -17,20 +17,28 @@ public class RemainingTimeCalculator {
 
     private int mCurrentLowerLimit = UNKNOWN_LIMIT;
 
-    // 用于跟踪记录的文件大小的状态
+    /**
+     * 用于跟踪记录的文件大小的状态
+     */
     private File mRecordingFile;
 
     private long mMaxBytes;
 
-    // 文件增长的速度
+    /**
+     * 文件增长的速度
+     */
     private int mBytesPerSecond;
 
-    // 最后更改时间
+    /**
+     * 最后更改时间
+     */
     private long mBlocksChangedTime;
 
     private long mLastBlocks;
 
-    // 文件大小最后更改的时间
+    /**
+     * 文件大小最后更改的时间
+     */
     private long mFileSizeChangedTime;
 
     private long mLastFileSize;
@@ -57,8 +65,8 @@ public class RemainingTimeCalculator {
         long now = System.currentTimeMillis();
 
         fs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
-        blocks = fs.getAvailableBlocks() - EXTERNAL_STORAGE_BLOCK_THREAD_HOLD;
-        blockSize = fs.getBlockSize();
+        blocks = fs.getAvailableBlocksLong() - EXTERNAL_STORAGE_BLOCK_THREAD_HOLD;
+        blockSize = fs.getBlockSizeLong();
         if (blocks < 0) {
             blocks = 0;
         }
@@ -101,7 +109,7 @@ public class RemainingTimeCalculator {
 
     public boolean diskSpaceAvailable() {
         StatFs fs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
-        return fs.getAvailableBlocks() > EXTERNAL_STORAGE_BLOCK_THREAD_HOLD;
+        return fs.getAvailableBlocksLong() > EXTERNAL_STORAGE_BLOCK_THREAD_HOLD;
     }
 
 

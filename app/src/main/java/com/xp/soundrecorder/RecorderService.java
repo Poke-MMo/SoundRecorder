@@ -81,6 +81,7 @@ public class RecorderService extends Service implements MediaRecorder.OnErrorLis
     private final Handler mHandler = new Handler();
 
     private Runnable mUpdateRemainingTime = new Runnable() {
+        @Override
         public void run() {
             if (mRecorder != null && mNeedUpdateRemainingTime) {
                 updateRemainingTime();
