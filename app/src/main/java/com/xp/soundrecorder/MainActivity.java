@@ -1,6 +1,5 @@
 package com.xp.soundrecorder;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -21,7 +20,6 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
