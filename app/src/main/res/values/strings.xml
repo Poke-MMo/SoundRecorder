@@ -1,5 +1,5 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">SoundRecorder</string>
+    <string name="app_name">录音机</string>
 
     <string name="recording">"录音"</string>
     <string name="recording_stopped">"录音停止"</string>
