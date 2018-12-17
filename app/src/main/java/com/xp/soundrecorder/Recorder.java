@@ -27,8 +27,6 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
 
     private int mState = IDLE_STATE;
 
-    public static final int NO_ERROR = 0;
-
     public static final int STORAGE_ACCESS_ERROR = 1;
 
     public static final int INTERNAL_ERROR = 2;
